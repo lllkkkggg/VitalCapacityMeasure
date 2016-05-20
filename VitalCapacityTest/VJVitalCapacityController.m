@@ -121,7 +121,6 @@
     [recorder stop];
     //停止计时器
     [timer invalidate];
-    
     [self.btn setTitle:@"使劲吹吧" forState:UIControlStateNormal];
     _numLabel.text=@"0";
     i=0;
@@ -130,7 +129,6 @@
     if([recorder prepareToRecord]){
         //开始
         [recorder record];
-        
     }
     timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(detectionVioce) userInfo:nil repeats:YES];
     self.btn.userInteractionEnabled=NO;
@@ -140,8 +138,7 @@
 {
     
     [recorder updateMeters];
-    float avg = [recorder peakPowerForChannel:1];
-    
+    float avg = [recorder averagePowerForChannel:1];
     //比如把-60作为最低分贝
     float minValue = -60;
     //把60作为获取分配的范围
@@ -155,27 +152,22 @@
     }
     //计算显示分贝
    float decibels = (avg + range) / range * outRange;
-//    _label.text=[NSString stringWithFormat:@"%f",decibels];
-    
-    if (i>100 && decibels <75) {
-            //删除我们的记录文件
-            [recorder deleteRecording];
-            //停止录音
-            [recorder stop];
-            //停止计时器
-            [timer invalidate];
-            [self.btn setTitle:@"再测一次" forState:UIControlStateNormal];
-        self.btn.userInteractionEnabled=YES;
+    NSLog(@"\n       %f\n",decibels);
+    if (decibels>=80 && decibels<100) {
+        i+=20;
+        _numLabel.text=[NSString stringWithFormat:@"%d",i];
     }
-    else if (80<decibels && decibels<100){
-        i+=10;
+    else if (decibels ==outRange){
+        i+=400;
         _numLabel.text=[NSString stringWithFormat:@"%d",i];
 
     }
-    else if (decibels ==outRange)
-    {
-    i+=20;
-    _numLabel.text=[NSString stringWithFormat:@"%d",i];
+    else if (i>100 && decibels <80){
+        [recorder deleteRecording];
+        [recorder stop];
+        [timer invalidate];
+        [self.btn setTitle:@"再测一次" forState:UIControlStateNormal];
+        self.btn.userInteractionEnabled=YES;
     }
 }
 
